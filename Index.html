@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Plant Points">
+    <title>Plant Points Tracker</title>
+    <style>
+        :root {
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --primary: #34C759;
+            --text: #000000;
+            --subtext: #8E8E93;
+            --border: #E5E5EA;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --card-bg: #1C1C1E;
+                --text: #FFFFFF;
+                --subtext: #8E8E93;
+                --border: #38383A;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .score-title {
+            font-size: 14px;
+            color: var(--subtext);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .score-val {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .score-max {
+            font-size: 18px;
+            color: var(--subtext);
+            font-weight: 500;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--border);
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background-color: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin: 20px 4px 8px 4px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .section-info {
+            font-size: 13px;
+            color: var(--subtext);
+        }
+
+        .category-card {
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 0.5px solid var(--border);
+            cursor: pointer;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--subtext);
+            margin-right: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .item-row.checked .checkbox {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .item-row.checked .checkbox::after {
+            display: block;
+        }
+
+        .item-name {
+            flex-grow: 1;
+            font-size: 16px;
+        }
+
+        .item-row.checked .item-name {
+            text-decoration: line-through;
+            color: var(--subtext);
+        }
+
+        .badge {
+            font-size: 12px;
+            background-color: var(--bg);
+            color: var(--subtext);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #FF3B30;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            margin: 30px 0 40px 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <div class="score-title">Wochen-Score</div>
+        <div>
+            <span class="score-val" id="totalScore">0</span>
+            <span class="score-max">/ 30 Pkt.</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div id="app"></div>
+
+    <button class="reset-btn" onclick="confirmReset()">Neue Woche starten (Reset)</button>
+
+    <script>
+        const categories = [
+            {
+                name: "1. Gemüse & Wurzelgemüse",
+                rec: "8–10 Sorten",
+                items: [
+                    { name: "Sauerkraut / Sauerrotkohl", pts: 1 },
+                    { name: "Kimchi", pts: 1 },
+                    { name: "Echte Salz-Dill-Gurken", pts: 1 },
+                    { name: "Fermentierte Karotten / Rote Bete", pts: 1 },
+                    { name: "Brokkoli", pts: 1 },
+                    { name: "Blumenkohl", pts: 1 },
+                    { name: "Rosenkohl", pts: 1 },
+                    { name: "Karotten / Möhren", pts: 1 },
+                    { name: "Zucchini", pts: 1 },
+                    { name: "Paprika", pts: 1 },
+                    { name: "Spargel", pts: 1 },
+                    { name: "Topinambur", pts: 1 },
+                    { name: "Zwiebeln", pts: 1 },
+                    { name: "Lauch / Porree", pts: 1 },
+                    { name: "Rote Bete", pts: 1 },
+                    { name: "Blattspinat", pts: 1 },
+                    { name: "Grünkohl / Kale", pts: 1 },
+                    { name: "Fenchel", pts: 1 },
+                    { name: "Aubergine", pts: 1 },
+                    { name: "Hokkaido- / Butternusskürbis", pts: 1 },
+                    { name: "Mangold", pts: 1 },
+                    { name: "Radieschen", pts: 1 },
+                    { name: "Weißkohl / Rotkohl", pts: 1 },
+                    { name: "Rucola / Feldsalat", pts: 1 },
+                    { name: "Chicorée", pts: 1 },
+                    { name: "Pastinaken", pts: 1 },
+                    { name: "Petersilienwurzel", pts: 1 },
+                    { name: "Stauden- / Knollensellerie", pts: 1 },
+                    { name: "Pak Choi", pts: 1 }
+                ]
+            },
+            {
+                name: "2. Hülsenfrüchte",
+                rec: "4–5 Sorten",
+                items: [
+                    { name: "Tempeh", pts: 1 },
+                    { name: "Miso", pts: 1 },
+                    { name: "Nattō", pts: 1 },
+                    { name: "Sojadrink / Sojajoghurt", pts: 1 },
+                    { name: "Braune / Grüne Tellerlinsen", pts: 1 },
+                    { name: "Rote Linsen", pts: 1 },
+                    { name: "Beluga-Linsen", pts: 1 },
+                    { name: "Kichererbsen", pts: 1 },
+                    { name: "Schwarze Bohnen", pts: 1 },
+                    { name: "Kidneybohnen", pts: 1 },
+                    { name: "Edamame / Sojabohnen", pts: 1 },
+                    { name: "Weiße Cannellini-Bohnen", pts: 1 },
+                    { name: "Wachtelbohnen (Pinto)", pts: 1 },
+                    { name: "Grüne Bohnen", pts: 1 },
+                    { name: "Gelbe Erbsen / Grünerbsen", pts: 1 },
+                    { name: "Lupinen / Lupinenmehl", pts: 1 },
+                    { name: "Gelbe Linsen", pts: 1 },
+                    { name: "Berglinsen", pts: 1 },
+                    { name: "Käferbohnen / Feuerbohnen", pts: 1 },
+                    { name: "Mungbohnen", pts: 1 },
+                    { name: "Kichererbsenmehl", pts: 1 }
+                ]
+            },
+            {
+                name: "3. Nüsse & Samen",
+                rec: "6–8 Sorten",
+                items: [
+                    { name: "Mandeldrink / Mandeljoghurt", pts: 1 },
+                    { name: "Cashew-Käse / Cashewjoghurt", pts: 1 },
+                    { name: "Walnüsse", pts: 1 },
+                    { name: "Mandeln", pts: 1 },
+                    { name: "Chiasamen", pts: 1 },
+                    { name: "Geschrotete Leinsamen", pts: 1 },
+                    { name: "Kürbiskerne", pts: 1 },
+                    { name: "Sonnenblumenkerne", pts: 1 },
+                    { name: "Sesam (hell / schwarz)", pts: 1 },
+                    { name: "Hanfsamen", pts: 1 },
+                    { name: "Haselnüsse", pts: 1 },
+                    { name: "Cashewkerne", pts: 1 },
+                    { name: "Paranüsse", pts: 1 },
+                    { name: "Pekannüsse", pts: 1 },
+                    { name: "Pinienkerne", pts: 1 },
+                    { name: "Pistazien", pts: 1 },
+                    { name: "Mohn", pts: 1 },
+                    { name: "Macadamianüsse", pts: 1 },
+                    { name: "Erdnüsse", pts: 1 },
+                    { name: "Flohsamenschalen", pts: 1 },
+                    { name: "Mandelmus / Haselnussmus", pts: 1 },
+                    { name: "Tahin / Sesammus", pts: 1 }
+                ]
+            },
+            {
+                name: "4. Vollkorn & Stärke",
+                rec: "4–5 Sorten",
+                items: [
+                    { name: "Sauerteigbrot", pts: 1 },
+                    { name: "Haferdrink / Haferjoghurt", pts: 1 },
+                    { name: "Haferflocken / Haferkleie", pts: 1 },
+                    { name: "Quinoa", pts: 1 },
+                    { name: "Vollkornreis (Natur/Wild/Rot)", pts: 1 },
+                    { name: "Buchweizen", pts: 1 },
+                    { name: "Dinkel-Vollkorn", pts: 1 },
+                    { name: "Hirse", pts: 1 },
+                    { name: "Kartoffeln (gekühlt)", pts: 1 },
+                    { name: "Süßkartoffeln", pts: 1 },
+                    { name: "Grünkern", pts: 1 },
+                    { name: "Gerste / Rollgerste", pts: 1 },
+                    { name: "Amaranth", pts: 1 },
+                    { name: "Bulgur / Couscous (Vollkorn)", pts: 1 },
+                    { name: "Roggen-Vollkorn", pts: 1 },
+                    { name: "Kamut / Khorasan", pts: 1 },
+                    { name: "Einkorn / Emmer", pts: 1 },
+                    { name: "Teff", pts: 1 },
+                    { name: "Mais / Polenta (Vollkorn)", pts: 1 }
+                ]
+            },
+            {
+                name: "5. Obst & Beeren",
+                rec: "4–5 Sorten",
+                items: [
+                    { name: "Blaubeeren / Heidelbeeren", pts: 1 },
+                    { name: "Himbeeren", pts: 1 },
+                    { name: "Brombeeren", pts: 1 },
+                    { name: "Erdbeeren", pts: 1 },
+                    { name: "Äpfel", pts: 1 },
+                    { name: "Birnen", pts: 1 },
+                    { name: "Bananen (grünlich)", pts: 1 },
+                    { name: "Granatapfelkerne", pts: 1 },
+                    { name: "Kiwis", pts: 1 },
+                    { name: "Pflaumen / Zwetschgen", pts: 1 },
+                    { name: "Orangen / Mandarinen", pts: 1 },
+                    { name: "Feigen", pts: 1 },
+                    { name: "Johannisbeeren", pts: 1 },
+                    { name: "Preiselbeeren / Cranberries", pts: 1 },
+                    { name: "Grapefruit / Pomelo", pts: 1 },
+                    { name: "Aprikosen / Marillen", pts: 1 },
+                    { name: "Papaya", pts: 1 }
+                ]
+            },
+            {
+                name: "6. Kräuter, Gewürze & Extras",
+                rec: "4–8 Sorten",
+                items: [
+                    { name: "Kombucha", pts: 0.25 },
+                    { name: "Naturtrüber Apfelessig", pts: 0.25 },
+                    { name: "Wasserkefir", pts: 0.25 },
+                    { name: "Knoblauch", pts: 0.25 },
+                    { name: "Kurkuma", pts: 0.25 },
+                    { name: "Zimt (Ceylon)", pts: 0.25 },
+                    { name: "Petersilie", pts: 0.25 },
+                    { name: "Koriander", pts: 0.25 },
+                    { name: "Basilikum", pts: 0.25 },
+                    { name: "Oregano / Thymian / Rosmarin", pts: 0.25 },
+                    { name: "Ingwer", pts: 0.25 },
+                    { name: "Kakao-Nibs / Schoko (≥ 85%)", pts: 0.25 },
+                    { name: "Schwarzer Pfeffer / Chili", pts: 0.25 },
+                    { name: "Kreuzkümmel (Cumin)", pts: 0.25 },
+                    { name: "Schwarzkümmel", pts: 0.25 },
+                    { name: "Grüner/Schwarzer Tee / Kaffee", pts: 0.25 },
+                    { name: "Schnittlauch", pts: 0.25 },
+                    { name: "Dill", pts: 0.25 },
+                    { name: "Kardamom", pts: 0.25 },
+                    { name: "Paprikapulver", pts: 0.25 },
+                    { name: "Getrocknete Pilze", pts: 0.25 }
+                ]
+            }
+        ];
+
+        let state = JSON.parse(localStorage.getItem('plant_points_state')) || {};
+
+        function renderApp() {
+            const container = document.getElementById('app');
+            container.innerHTML = '';
+            let totalScore = 0;
+
+            categories.forEach((cat, catIdx) => {
+                let catScore = 0;
+
+                const header = document.createElement('div');
+                header.className = 'section-header';
+                
+                cat.items.forEach((item, itemIdx) => {
+                    const id = `${catIdx}_${itemIdx}`;
+                    if (state[id]) catScore += item.pts;
+                });
+                totalScore += catScore;
+
+                header.innerHTML = `
+                    <span class="section-title">${cat.name}</span>
+                    <span class="section-info">${catScore} Pkt. | Ziel: ${cat.rec}</span>
+                `;
+                container.appendChild(header);
+
+                const card = document.createElement('div');
+                card.className = 'category-card';
+
+                cat.items.forEach((item, itemIdx) => {
+                    const id = `${catIdx}_${itemIdx}`;
+                    const isChecked = !!state[id];
+
+                    const row = document.createElement('div');
+                    row.className = `item-row ${isChecked ? 'checked' : ''}`;
+                    row.onclick = () => toggleItem(id);
+
+                    row.innerHTML = `
+                        <div class="checkbox"></div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="badge">+${item.pts}</div>
+                    `;
+                    card.appendChild(row);
+                });
+
+                container.appendChild(card);
+            });
+
+            document.getElementById('totalScore').innerText = totalScore % 1 === 0 ? totalScore : totalScore.toFixed(2);
+            const pct = Math.min((totalScore / 30) * 100, 100);
+            document.getElementById('progressBar').style.width = pct + '%';
+        }
+
+        function toggleItem(id) {
+            state[id] = !state[id];
+            localStorage.setItem('plant_points_state', JSON.stringify(state));
+            renderApp();
+        }
+
+        function confirmReset() {
+            if (confirm("Möchtest du wirklich alle Haken für die neue Woche zurücksetzen?")) {
+                state = {};
+                localStorage.removeItem('plant_points_state');
+                renderApp();
+            }
+        }
+
+        renderApp();
+    </script>
+</body>
+</html>
