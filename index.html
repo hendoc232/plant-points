@@ -54,7 +54,7 @@
             border-radius: 16px;
             padding: 16px;
             margin-top: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             position: sticky;
@@ -144,6 +144,29 @@
             margin-top: 8px;
             background-color: rgba(0, 122, 255, 0.15);
             color: #007AFF;
+        }
+
+        /* SEARCH BAR */
+        .search-container {
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background-color: var(--card-bg);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            -webkit-appearance: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--subtext);
         }
 
         /* Trend Modal / Container */
@@ -335,6 +358,13 @@
             font-weight: 600;
         }
 
+        .no-results {
+            text-align: center;
+            color: var(--subtext);
+            padding: 24px 16px;
+            font-size: 14px;
+        }
+
         /* MODAL STYLES FÜR README / HILFE */
         .modal-overlay {
             display: none;
@@ -433,6 +463,11 @@
         <div class="score-title" style="text-align: left; margin-bottom: 8px;">Punkte-Entwicklung</div>
         <div class="chart-wrapper" id="chartWrapper"></div>
         <div class="legend" id="legend"></div>
+    </div>
+
+    <!-- SUCHFELD -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Lebensmittel suchen..." oninput="renderApp()">
     </div>
 
     <!-- MAIN FOOD LIST -->
@@ -572,59 +607,76 @@
         function renderApp() {
             document.getElementById('weekStartDate').innerText = weekStartDate;
             const container = document.getElementById('app');
+            const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
             container.innerHTML = '';
+            
             let totalScore = 0;
+            let totalVisibleItems = 0;
 
             categories.forEach((cat, catIdx) => {
                 let catScore = 0;
-
+                
+                // Gesamte Punkte berechnen
                 cat.items.forEach((item, itemIdx) => {
                     const id = `${catIdx}_${itemIdx}`;
                     if (state[id]) catScore += item.pts;
                 });
                 totalScore += catScore;
 
-                const isCollapsed = !!collapsedCats[catIdx];
+                // Gefilterte Items für die Anzeige
+                const matchingItems = cat.items.map((item, itemIdx) => ({ ...item, originalIdx: itemIdx }))
+                    .filter(item => item.name.toLowerCase().includes(query));
 
-                // HEADER
-                const header = document.createElement('div');
-                header.className = `section-header ${isCollapsed ? 'collapsed' : ''}`;
-                header.onclick = () => toggleCategory(catIdx);
+                if (matchingItems.length > 0) {
+                    totalVisibleItems += matchingItems.length;
 
-                header.innerHTML = `
-                    <div class="section-title-wrap">
-                        <span class="toggle-icon">▼</span>
-                        <span class="section-title">${cat.name}</span>
-                    </div>
-                    <span class="section-info">${catScore} Pkt. | Ziel: ${cat.rec}</span>
-                `;
-                container.appendChild(header);
+                    // Wenn gesucht wird, automatisch alle treffennden Kategorien ausklappen
+                    const isCollapsed = query.length > 0 ? false : !!collapsedCats[catIdx];
 
-                // CONTENT
-                const card = document.createElement('div');
-                card.className = `category-card ${isCollapsed ? 'collapsed' : ''}`;
+                    // HEADER
+                    const header = document.createElement('div');
+                    header.className = `section-header ${isCollapsed ? 'collapsed' : ''}`;
+                    header.onclick = () => toggleCategory(catIdx);
 
-                cat.items.forEach((item, itemIdx) => {
-                    const id = `${catIdx}_${itemIdx}`;
-                    const isChecked = !!state[id];
-
-                    const row = document.createElement('div');
-                    row.className = `item-row ${isChecked ? 'checked' : ''}`;
-                    row.onclick = (e) => {
-                        e.stopPropagation();
-                        toggleItem(id);
-                    };
-
-                    row.innerHTML = `
-                        <div class="checkbox"></div>
-                        <div class="item-name">${item.name}</div>
-                        <div class="badge">+${item.pts}</div>
+                    header.innerHTML = `
+                        <div class="section-title-wrap">
+                            <span class="toggle-icon">▼</span>
+                            <span class="section-title">${cat.name}</span>
+                        </div>
+                        <span class="section-info">${catScore} Pkt. | Ziel: ${cat.rec}</span>
                     `;
-                    card.appendChild(row);
-                });
+                    container.appendChild(header);
 
-                container.appendChild(card);
+                    // CONTENT
+                    const card = document.createElement('div');
+                    card.className = `category-card ${isCollapsed ? 'collapsed' : ''}`;
+
+                    matchingItems.forEach((item) => {
+                        const id = `${catIdx}_${item.originalIdx}`;
+                        const isChecked = !!state[id];
+
+                        const row = document.createElement('div');
+                        row.className = `item-row ${isChecked ? 'checked' : ''}`;
+                        row.onclick = (e) => {
+                            e.stopPropagation();
+                            toggleItem(id);
+                        };
+
+                        row.innerHTML = `
+                            <div class="checkbox"></div>
+                            <div class="item-name">${item.name}</div>
+                            <div class="badge">+${item.pts}</div>
+                        `;
+                        card.appendChild(row);
+                    });
+
+                    container.appendChild(card);
+                }
             });
+
+            if (query.length > 0 && totalVisibleItems === 0) {
+                container.innerHTML = `<div class="no-results">Kein Lebensmittel für „${query}“ gefunden.</div>`;
+            }
 
             document.getElementById('totalScore').innerText = totalScore % 1 === 0 ? totalScore : totalScore.toFixed(2);
             const pct = Math.min((totalScore / 30) * 100, 100);
