@@ -1,57 +1,43 @@
-# 🌿 Plant Points Tracker (Zoe & Tim Spector Method)
+# 🌿 30 Plants Project Tracker (v1.0)
 
-Eine datenschutzfreundliche, offline-fähige Progressive Web App (PWA) zur Erfassung deiner wöchentlichen **Plant Points** zur gezielten Förderung der Darmgesundheit und Mikrobiom-Diversität.
-
----
-
-## 🔬 Wissenschaftlicher Hintergrund & Nutzen
-
-### Warum Pflanzendiversität?
-Großangelegte Studien des **American & British Gut Project** (unter der Leitung von Prof. Tim Spector, King's College London & Co-Gründer von ZOE) haben gezeigt:
-> **Menschen, die mindestens 30 verschiedene pflanzliche Lebensmittel pro Woche essen, besitzen ein deutlich vielfältigeres und widerstandsfähigeres Mikrobiom.**
-
-### Das Punktesystem (Plant Points)
-Jede Pflanze liefert einzigartige Ballaststoffe, präbiotische Fasern und Polyphenole, die als Nahrung für unterschiedliche nützliche Bakterienstämme im Darm dienen:
-
-* **1,0 Punkt:** Ganze pflanzliche Lebensmittel (Gemüse, Hülsenfrüchte, Nüsse, Samen, Vollkorngetreide, Obst, fermentierte Pflanzengerichte).
-* **0,25 Punkte:** Kräuter, Gewürze, Knoblauch, ungesüßter Tee, Kaffee, naturbelassener Kakao und naturtrüber Apfelessig (aufgrund der hohen Polyphenol-Konzentration bei kleineren Verzehrmengen).
-* **Ziel:** Mindestens **30 Punkte pro Woche** erreichen. Wiederholungen derselben Pflanze innerhalb einer Woche zählen nicht extra.
+Eine mobile Progressiv-Web-App (PWA) zur einfachen Nachverfolgung wöchentlicher **Plant Points** auf Basis der Mikrobiom-Forschung von **Prof. Tim Spector / ZOE** (American & British Gut Project).
 
 ---
 
-## 📱 Features der App
+## 🔬 Wissenschaftlicher Hintergrund & Quellen
 
-* **30-Punkte-Wochen-Score:** Live-Fortschrittsbalken und Punkteberechnung nach der Tim-Spector-Methodik.
-* **100+ Lebensmittel in 6 Kategorien:**
-  1. 🥦 Gemüse & Wurzelgemüse (inkl. Fermentiertem wie Kimchi & Sauerkraut)
-  2. 🫘 Hülsenfrüchte (inkl. Tempeh & Miso)
-  3. 🌰 Nüsse & Samen
-  4. 🌾 Vollkorn, Pseudogetreide & Stärke (inkl. Sauerteigbrot)
-  5. 🫐 Obst & Beeren
-  6. 🌿 Kräuter, Gewürze & Extras (je 0,25 Punkte)
-* **Einklappbare Kategorien:** Schnelles Ausblenden von Kategorien für maximale Übersicht beim Scrollen.
-* **Trend & Historie (Balkendiagramm):** Speicherung abgelaufener Wochen mit farblich gestapeltem Balkendiagramm zur Nachverfolgung der Langzeit-Entwicklung.
-* **Offline-First & Datenschutz:** Alle Daten bleiben lokal auf deinem iPhone/Gerät im `localStorage` gespeichert. Keine Registrierung, keine Server-Übertragung.
+Ziel der App ist das Erreichen von mindestens **30 verschiedenen pflanzlichen Lebensmitteln pro Woche**, um die Diversität und Gesundheit des Darm-Mikrobioms nachweislich zu steigern.
+
+Die Datenstruktur und Punktevergabe der 127 gelisteten Lebensmittel basieren exklusiv auf den Veröffentlichungen folgender Studien:
+
+1. **Hauptstudie / Datengrundlage:**  
+   > McDonald, D., Hyde, E., Debelius, J. W., Morton, J. T., Gonzalez, A., Armada, G., ... & Knight, R. (2018). *American Gut: an Open Platform for Citizen Science Microbiome Research*. **mSystems**, 3(3), e00031-18.
+2. **ZOE PREDICT Studien (Mikrobiom & Pflanzendiversität):**  
+   > Asnicar, F., Berry, S. E., Valdes, A. M., Nguyen, L. H., Piccinno, G., Drew, D. A., ... & Segata, N. (2021). *Microbiome connections with host metabolism and diet in 1,098 individuals*. **Nature Medicine**, 27(2), 321-332.
 
 ---
 
-## 🚀 Installation auf dem iPhone (Als App speichern)
+## 📊 Punktesystem ("Super Six")
 
-1. Öffne die GitHub-Pages-URL der App im **Safari-Browser** auf deinem iPhone.
-2. Tippe ganz unten auf das **Teilen-Symbol** (Quadrat mit Pfeil nach oben).
-3. Scrolle nach unten und wähle **„Zum Home-Bildschirm“** (*Add to Home Screen*).
-4. Die App befindet sich nun als eigenes Icon auf deinem Home-Bildschirm und öffnet sich wie eine native App im Vollbildmodus.
+- **1,0 Punkt:** Ganze Pflanzennahrung (Gemüse, Hülsenfrüchte, Nüsse, Samen, Vollkorn, Obst).
+- **0,25 Punkte:** Kräuter, Gewürze, Knoblauch, Tee, Kaffee, Kakao und nahrhafte Säuren (aufgrund der hohen Polyphenol-Dichte).
 
 ---
 
-## 🛠️ Bedienungsanleitung
+## 🔒 Datenschutz
 
-* **Abhaken:** Tippe auf ein Lebensmittel, wenn du es diese Woche gegessen hast. Die Punkte werden automatisch oben und in der jeweiligen Kategorie aufaddiert.
-* **Kategorie einklappen:** Tippe auf die Überschrift einer Kategorie, um die Liste einzuklappen.
-* **Woche auf 0 zurücksetzen:** Setzt die aktuellen Haken zurück, falls du dich vertippt hast.
-* **Neue Woche starten:** Speichert den aktuellen Punktestand mit Startdatum fest in der Historie ab und leert die Liste für die neue Woche.
-* **Trend & Historie anzeigen:** Öffnet das Diagramm, um deinen wöchentlichen Fortschritt und die Zusammensetzung deiner Pflanzenpunkte zu analysieren.
+Diese Anwendung speichert alle Eingaben **ausschließlich lokal im Browser des Nutzers** (`localStorage`).  
+- Keinerlei Server-Übertragung  
+- Keine Tracking-Tools oder Cookies  
+- Keine Datenerfassung  
 
 ---
 
-*Entwickelt als leichtgewichtige Open-Source PWA zur Unterstützung einer darmfreundlichen Lebensweise.*
+## ⚖️ Haftungsausschluss & Impressum
+
+- **Copyright:** © 2026 **Hendrik Behrens**
+- **Version:** 1.0 (Oktober 2026)
+- **Typ:** Rein private, nicht-kommerzielle Web-Anwendung.
+
+**Klausel:**  
+Es wird keinerlei Gewähr oder Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der bereitgestellten Daten und Funktionen übernommen. Die Inhalte dienen ausschließlich Informations- und Dokumentationszwecken und stellen keine medizinische oder ernährungswissenschaftliche Beratung dar.
